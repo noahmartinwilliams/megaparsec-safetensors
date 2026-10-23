@@ -59,4 +59,7 @@ getDType _ (Just (JSONString "BOOL")) = return DTBOOL
 getDType str j = failure Nothing (Set.fromList [Label ('I' :| "nvalid data type: " ++ (show j) ++ " for object: \"" ++ str ++ "\".")])
     
 
---getShape :: String -> MaybeJSONObj -> SafetParser (Int, Int)
+getShape :: String -> Maybe JSONObj -> SafetParser (Int, Int)
+getShape str Nothing = failure Nothing (Set.fromList [(Label ('M' :| "issing key shape in " ++ str ++ "."))])
+getShape _ (Just (JSONList [(JSONInt m), (JSONInt n)])) = return (m, n)
+getShape str (Just broken) = failure Nothing (Set.fromList [Label ('M' :| "alformed entry \"shape\" in \"" ++ str ++ "\" key:" ++ (show broken))])
