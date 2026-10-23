@@ -1,11 +1,9 @@
 module Text.Megaparsec.Safetensors.Header where
 
-import Data.ByteString as BS
 import Data.ByteString.Lazy.UTF8 as BSL
 import Data.List.NonEmpty
 import Data.Map
 import Data.Set as Set
-import Data.Word
 import Text.Megaparsec
 import Text.Megaparsec.Byte.Binary
 import Text.Megaparsec.JSON
@@ -13,7 +11,7 @@ import Text.Megaparsec.Safetensors.Types
 
 data DType = F64 | F32 | F16 | BF16 | I64 | I32 | I16 | I8 | U8 | DTBOOL deriving(Show, Eq)
 
-data STTensorMeta = TensorMeta { sttmName :: String, sttmDType :: DType, sttmShape :: (Int, Int), sttmDataOffsets :: (Int, Int) }
+data STTensorMeta = TensorMeta { sttmName :: String, sttmDType :: DType, sttmShape :: (Int, Int), sttmDataOffsets :: (Int, Int) } deriving(Show, Eq)
 
 safetHeaderSize :: SafetParser Int
 safetHeaderSize = do
@@ -39,10 +37,15 @@ getTensorsMeta = do
     getTensorsMeta' names json'
 -}
 
---getTensorsMeta' :: [String] -> Map String JSONObj -> SafetParser [STTensorMeta]
---getTensorsMeta' [] _ = return []
---getTensorsMeta' (h : t) m = do
-    --dt <- getDType h ((lookup h m) >>= (\(JSONObj x) -> lookup "dtype" x))
+getTensorsMeta' :: [String] -> Map String JSONObj -> SafetParser [STTensorMeta]
+getTensorsMeta' [] _ = return []
+getTensorsMeta' (h : t) m = do
+    dt <- getDType h ((Data.Map.lookup h m) >>= (\y -> case y of (JSONObj x) -> Data.Map.lookup "dtype" x ; _ -> Nothing))
+    sh <- getShape h ((Data.Map.lookup h m) >>= (\y -> case y of (JSONObj x) -> Data.Map.lookup "shape" x ; _ -> Nothing))
+    off <- getShape h ((Data.Map.lookup h m) >>= (\y -> case y of (JSONObj x) -> Data.Map.lookup "data_offsets" x ; _ -> Nothing))
+    let ret = TensorMeta { sttmName = h, sttmDType = dt, sttmShape = sh, sttmDataOffsets = off}
+    rest <- getTensorsMeta' t m 
+    return (ret : rest)
 
 getDType :: String -> Maybe JSONObj -> SafetParser DType
 getDType s Nothing = failure Nothing (Set.fromList [Label ('M' :| "issing key dtype in " ++ s ++ ".")])
@@ -63,3 +66,8 @@ getShape :: String -> Maybe JSONObj -> SafetParser (Int, Int)
 getShape str Nothing = failure Nothing (Set.fromList [(Label ('M' :| "issing key shape in " ++ str ++ "."))])
 getShape _ (Just (JSONList [(JSONInt m), (JSONInt n)])) = return (m, n)
 getShape str (Just broken) = failure Nothing (Set.fromList [Label ('M' :| "alformed entry \"shape\" in \"" ++ str ++ "\" key:" ++ (show broken))])
+
+getOffset :: String -> Maybe JSONObj -> SafetParser (Int, Int)
+getOffset str Nothing = failure Nothing (Set.fromList [(Label ('M' :| "issing key data_offsets in " ++ str ++ "."))])
+getOffset _ (Just (JSONList [(JSONInt s), (JSONInt e)])) = return (s, e)
+getOffset str (Just broken) = failure Nothing (Set.fromList [Label ('M' :| "alformed entry \"data_offsets\" in \"" ++ str ++ "\" key:" ++ (show broken))])
