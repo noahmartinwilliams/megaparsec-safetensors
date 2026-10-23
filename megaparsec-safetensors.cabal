@@ -37,23 +37,10 @@ library
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , containers
     , megaparsec
     , megaparsec-json
     , utf8-string
-  default-language: Haskell2010
-
-executable megaparsec-safetensors-exe
-  main-is: Main.hs
-  other-modules:
-      Paths_megaparsec_safetensors
-  autogen-modules:
-      Paths_megaparsec_safetensors
-  hs-source-dirs:
-      app
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , megaparsec-safetensors
   default-language: Haskell2010
 
 test-suite megaparsec-safetensors-test
