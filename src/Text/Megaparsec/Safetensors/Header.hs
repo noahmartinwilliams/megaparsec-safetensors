@@ -11,7 +11,7 @@ import Text.Megaparsec.Safetensors.Types
 
 data DType = F64 | F32 | F16 | BF16 | I64 | I32 | I16 | I8 | U8 | DTBOOL deriving(Show, Eq)
 
-data STTensorMeta = TensorMeta { sttmName :: String, sttmDType :: DType, sttmShape :: (Int, Int), sttmDataOffsets :: (Int, Int) } deriving(Show, Eq)
+data STTensorMeta = STTensorMeta { sttmName :: String, sttmDType :: DType, sttmShape :: (Int, Int), sttmDataOffsets :: (Int, Int) } deriving(Show, Eq)
 
 safetHeaderSize :: SafetParser Int
 safetHeaderSize = do
@@ -28,14 +28,12 @@ safetHeader headerSize = do
         Left err -> fail (errorBundlePretty err)
         Right json' -> return json'
 
-{-
-getTensorsMeta :: SafetParser [STTensorMeta]
-getTensorsMeta = do
+tensorsMeta :: SafetParser [STTensorMeta]
+tensorsMeta = do
     shs <- safetHeaderSize
-    json@(JSONObj json') <- safetHeader shs
+    (JSONObj json') <- safetHeader shs
     let names = keys json'
     getTensorsMeta' names json'
--}
 
 getTensorsMeta' :: [String] -> Map String JSONObj -> SafetParser [STTensorMeta]
 getTensorsMeta' [] _ = return []
@@ -43,7 +41,7 @@ getTensorsMeta' (h : t) m = do
     dt <- getDType h ((Data.Map.lookup h m) >>= (\y -> case y of (JSONObj x) -> Data.Map.lookup "dtype" x ; _ -> Nothing))
     sh <- getShape h ((Data.Map.lookup h m) >>= (\y -> case y of (JSONObj x) -> Data.Map.lookup "shape" x ; _ -> Nothing))
     off <- getShape h ((Data.Map.lookup h m) >>= (\y -> case y of (JSONObj x) -> Data.Map.lookup "data_offsets" x ; _ -> Nothing))
-    let ret = TensorMeta { sttmName = h, sttmDType = dt, sttmShape = sh, sttmDataOffsets = off}
+    let ret = STTensorMeta { sttmName = h, sttmDType = dt, sttmShape = sh, sttmDataOffsets = off}
     rest <- getTensorsMeta' t m 
     return (ret : rest)
 

@@ -68,3 +68,12 @@ packages:
 extra-deps:
 - git: https://github.com/noahmartinwilliams/megaparsec-json.git
   commit: edf9011aed613f976b99b911c7e0acb3acd9e20b
+- git: https://github.com/mrkkrp/megaparsec.git
+  commit: 1ccb703fbc227f5bdbd3d4575a576af07ddf3a7e
+- git: https://github.com/noahmartinwilliams/matrix-accelerate.git
+  commit: a2e9340559a3233648541b5bb4d343d2d1847c11
+- git: https://github.com/AccelerateHS/accelerate.git
+  commit: 981db031c7573bd38decbf3c123769a051ce9f32
+- git: https://github.com/tmcdonell/lens-accelerate.git
+  commit: c717610c1ea5531d14ef0ca9f8e73e3aa3b80a5e
+- unique-0.0.2@sha256:8e3649c1007a0c9a3775733dd5f71f0e90dd2728933db1feae45b008fa88dc35,1344

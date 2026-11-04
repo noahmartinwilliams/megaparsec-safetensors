@@ -37,10 +37,13 @@ library:
   source-dirs: src
   dependencies:
   - megaparsec
+  - accelerate
+  - data-binary-ieee754
   - bytestring
   - megaparsec-json
   - utf8-string
   - containers
+  - matrix-accelerate
 
 tests:
   megaparsec-safetensors-test:
